@@ -80,13 +80,23 @@ void mul(int a[10][10], int b[10][10], int c[10][10], int m, int n)
 
 void trans(int a[10][10], int m, int n)
 {
+    int temp[10][10];
+
     printf("\nTranspose of Matrix:\n");
+
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            temp[j][i] = a[i][j];
+        }
+    }
 
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < m; j++)
         {
-            printf("%d ", a[j][i]);
+            printf("%d ", temp[i][j]);
         }
         printf("\n");
     }
