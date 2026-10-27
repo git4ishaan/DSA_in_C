@@ -87,8 +87,10 @@ void insert(struct Node **head, int c, int e)
     {
         n->next = p;
         prev->next = n;
-        if (p == *head)
-            *head = n;
+        /* NOTE: do NOT move *head here. This branch is also reached when the
+         * loop wrapped around (new exponent is the smallest), and in that case
+         * the node must simply be appended after `prev` (the last node).
+         * Moving head would break the descending order. */
     }
 }
 

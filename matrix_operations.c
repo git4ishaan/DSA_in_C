@@ -66,12 +66,18 @@ void mul(int a[10][10], int b[10][10], int c[10][10], int m, int n)
     printf("\nEnter elements of Second Matrix:\n");
     accept(b, m, n);
 
-    printf("\nElement-wise Multiplication:\n");
+    printf("\nMultiplication of Matrices:\n");
     for (int i = 0; i < m; i++)
     {
         for (int j = 0; j < n; j++)
         {
-            c[i][j] = a[i][j] * b[i][j];
+            c[i][j] = 0;
+
+            for (int k = 0; k < n; k++)
+            {
+                c[i][j] = c[i][j] + a[i][k] * b[k][j];
+            }
+
             printf("%d ", c[i][j]);
         }
         printf("\n");
