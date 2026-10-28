@@ -1,6 +1,7 @@
 # 02 — Matrix Operations & Saddle Point
 
-**Files:** `ass1.c`, `saddle_point.c`
+**Files:** `Matrix_Operations.c`
+**Chapter also covers:** saddle point (the old `saddle_point.c` is in the git history)
 **Exam value:** usually the easiest full-marks question. Pure nested loops.
 
 ---
@@ -116,9 +117,9 @@ C[1][1] = 3*6 + 4*8 = 18 + 32 = 50
 | 1 | 1 | 0 | 18 |
 | 1 | 1 | 1 | 50 |
 
-### The fix in your `ass1.c`
+### Why multiplication needs three loops
 
-Your original `mul()` computed:
+An easy mistake is to compute:
 
 ```c
 c[i][j] = a[i][j] * b[i][j];      /* element-wise, NOT matrix multiplication */
@@ -126,10 +127,9 @@ c[i][j] = a[i][j] * b[i][j];      /* element-wise, NOT matrix multiplication */
 
 and printed **"Element-wise Multiplication"**. That is the *Hadamard product*, a valid
 operation, but **it is not what "matrix multiplication" means in an exam**. If the
-question says *multiply two matrices*, you must use the three-loop version. That inner
-loop is the **only** change made to your file; the rest of the layout is untouched.
+question says *multiply two matrices*, you must use the three-loop version below.
 
-Because `ass1.c` uses a fixed 3×3 matrix, `m == n`, so the `k` loop simply runs to `n`:
+Because `Matrix_Operations.c` uses a fixed 3×3 matrix, `m == n`, so the `k` loop simply runs to `n`:
 
 ```c
 void mul(int a[10][10], int b[10][10], int c[10][10], int m, int n)
@@ -217,7 +217,7 @@ Step 8: Stop
 
 ### Trap
 When printing the transpose, the loops must be `for i < n` (rows) and `for j < m`
-(columns), because the result has **swapped dimensions**. Your `ass1.c` does this
+(columns), because the result has **swapped dimensions**. Your `Matrix_Operations.c` does this
 correctly (lines 101–108).
 
 ### In-place transpose for a square matrix (bonus viva answer)
@@ -236,7 +236,7 @@ Starting `j` at `i+1` avoids swapping every pair twice (which would undo the tra
 
 ---
 
-## How `ass1.c` is organised (line-by-line map)
+## How `Matrix_Operations.c` is organised (line-by-line map)
 
 | Lines | Function | Does |
 |-------|----------|------|

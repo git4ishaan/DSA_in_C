@@ -1,6 +1,6 @@
 # DSA in C — External Exam Mentor Guide
 
-You have 21 `.c` files in this folder. They are really **10 assignments**, and every one of
+You have 14 `.c` files in this folder. They are really **9 assignments**, and every one of
 them follows the same exam pattern:
 
 ```
@@ -15,16 +15,18 @@ This guide teaches you all five, in that order, for each assignment.
 
 | # | Assignment | Files | Chapter |
 |---|------------|-------|---------|
-| 1 | Matrix add / subtract / multiply / transpose | `ass1.c` | `02_MATRIX.md` |
-| 2 | Saddle point of a matrix | `saddle_point.c` | `02_MATRIX.md` |
-| 3 | Linear search and binary search | `linear_search.c`, `binary_search.c`, `Searching_sorting.c` | `03_SEARCHING.md` |
-| 4 | Bubble, selection, insertion, shell sort | `bubble_sort.c`, `selection_sort.c`, `Searching_sorting.c` | `04_SORTING.md` |
-| 5 | Sparse matrix: triplet form, transpose, addition | `sparse_matrix.c`, `simple_trans.c`, `fast_trans.c`, `combi_sparse.c`, `sparse_add.c` | `05_SPARSE.md` |
-| 6 | Stack: infix to postfix, postfix evaluation | `stack.c`, `stack2.c` | `06_STACK.md` |
-| 7 | Linear queue | `linear_queue.c` | `07_QUEUE.md` |
-| 8 | Circular queue | `circular_queue.c` | `07_QUEUE.md` |
-| 9 | Singly linked list (workshop enrollment) | `singlyll.c` | `08_SLL.md` |
-| 10 | Circular linked list + polynomial addition | `circlell.c`, `poly_add.c`, `poly_add_menu.c` | `09_CLL_POLY.md` |
+| 1 | Matrix add / subtract / multiply / transpose | `Matrix_Operations.c` | `02_MATRIX.md` |
+| 2 | Sparse matrix: triplet form, simple & fast transpose | `combi_sparse.c` | `05_SPARSE.md` |
+| 3 | Searching (linear, binary) and sorting (bubble, insertion, selection, shell) | `Searching_sorting.c`, `bubble_sort.c` | `03_SEARCHING.md`, `04_SORTING.md` |
+| 4 | Singly linked list (workshop enrollment) | `singlyll.c` | `08_SLL.md` |
+| 5 | Circular linked list + polynomial addition | `circlell.c`, `poly_add.c`, `poly_add_menu.c` | `09_CLL_POLY.md` |
+| 6 | Stack: infix to postfix conversion | `stack.c` | `06_STACK.md` |
+| 7 | Stack: postfix expression evaluation | `stack2.c` | `06_STACK.md` |
+| 8 | Linear queue | `linear_queue.c`, `linear_queue_simple.c` | `07_QUEUE.md` |
+| 9 | Circular queue | `circular_queue.c`, `circular_queue_simple.c` | `07_QUEUE.md` |
+
+The `02_MATRIX.md` chapter also covers the saddle-point exercise that used to live in
+`saddle_point.c`; that file is now only in the git history.
 
 Support material:
 
@@ -176,8 +178,8 @@ a blank page.
 You already have GCC 6.3 installed. From this folder:
 
 ```powershell
-gcc ass1.c -o ass1 -Wall
-.\ass1.exe
+gcc Matrix_Operations.c -o matrix_operations -Wall
+.\matrix_operations.exe
 ```
 
 - `-Wall` turns on warnings. **Read them** — they usually point at a real bug.
@@ -195,7 +197,7 @@ write code exactly as if it will compile. Do not invent syntax.
 | Day | What to do | Chapter |
 |-----|-----------|---------|
 | 1 | C primer: arrays, functions, pointers, structs, `malloc` | `01_C_PRIMER.md` |
-| 2 | Matrix + saddle point. Write both algorithms from memory. | `02_MATRIX.md` |
+| 2 | Matrix operations (+ saddle point from the chapter). Write both algorithms from memory. | `02_MATRIX.md` |
 | 3 | Searching + sorting. Memorise the 4 sort algorithms. | `03`, `04` |
 | 4 | Sparse matrix: triplet, simple transpose, fast transpose, addition. | `05_SPARSE.md` |
 | 5 | Stack + queue (linear and circular). Trace by hand. | `06`, `07` |

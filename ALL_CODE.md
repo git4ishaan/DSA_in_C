@@ -2,13 +2,13 @@
 
 Every C program in this folder, in one place.
 
-- 12 programs covering 9 topics
+- 14 programs covering 9 topics
 - Code is copied exactly from the `.c` files, so every listing compiles as shown
 - Each entry has a one-line purpose, a compile command, and the full code
 
-> **Note:** `GUIDE/` also refers to programs that are no longer in the folder
-> (saddle point, separate search/sort files, separate sparse files, `sll_workshop.c`).
-> Only the files actually present are included here.
+> **Note:** `GUIDE/` also discusses a few earlier single-purpose programs
+> (saddle point, separate search/sort files, `sll_workshop.c`) that are now only in the
+> git history. Only the files actually present are included here.
 
 ## Contents
 
@@ -19,8 +19,8 @@ Every C program in this folder, in one place.
 | Sorting | `bubble_sort.c` | `GUIDE/04_SORTING.md` |
 | Sparse matrix | `combi_sparse.c` | `GUIDE/05_SPARSE.md` |
 | Stack | `stack.c`, `stack2.c` | `GUIDE/06_STACK.md` |
-| Linear queue | `linear_queue.c` | `GUIDE/07_QUEUE.md` |
-| Circular queue | `circular_queue.c` | `GUIDE/07_QUEUE.md` |
+| Linear queue | `linear_queue.c`, `linear_queue_simple.c` | `GUIDE/07_QUEUE.md` |
+| Circular queue | `circular_queue.c`, `circular_queue_simple.c` | `GUIDE/07_QUEUE.md` |
 | Singly linked list | `singlyll.c` | `GUIDE/08_SLL.md` |
 | Circular list and polynomials | `circlell.c`, `poly_add.c`, `poly_add_menu.c` | `GUIDE/09_CLL_POLY.md` |
 
@@ -228,8 +228,6 @@ gcc Searching_sorting.c -o searching_sorting -Wall
 
 ```c
 #include <stdio.h>
-#include <string.h>
-
 #define MAX 100
 
 struct Student
@@ -239,38 +237,34 @@ struct Student
     float marks;
 };
 
-/* Display students */
 void display(struct Student s[], int n)
 {
-    printf("\n%-10s %-20s %-10s\n", "Roll No", "Name", "Marks");
-    printf("---------------------------------------------\n");
+    int i;
 
-    for (int i = 0; i < n; i++)
-    {
-        printf("%-10d %-20s %-10.2f\n",
-               s[i].roll, s[i].name, s[i].marks);
-    }
+    printf("\nRoll\tName\tMarks\n");
+
+    for (i = 0; i < n; i++)
+        printf("%d\t%s\t%.2f\n", s[i].roll, s[i].name, s[i].marks);
 }
 
-/* Linear Search */
 int linearSearch(struct Student s[], int n, int key)
 {
-    for (int i = 0; i < n; i++)
-    {
+    int i;
+
+    for (i = 0; i < n; i++)
         if (s[i].roll == key)
             return i;
-    }
+
     return -1;
 }
 
-/* Binary Search */
 int binarySearch(struct Student s[], int n, int key)
 {
-    int low = 0, high = n - 1;
+    int low = 0, high = n - 1, mid;
 
     while (low <= high)
     {
-        int mid = (low + high) / 2;
+        mid = (low + high) / 2;
 
         if (s[mid].roll == key)
             return mid;
@@ -283,13 +277,15 @@ int binarySearch(struct Student s[], int n, int key)
     return -1;
 }
 
-/* Insertion Sort */
 void insertionSort(struct Student s[], int n)
 {
-    for (int i = 1; i < n; i++)
+    int i, j;
+    struct Student temp;
+
+    for (i = 1; i < n; i++)
     {
-        struct Student temp = s[i];
-        int j = i - 1;
+        temp = s[i];
+        j = i - 1;
 
         while (j >= 0 && s[j].roll > temp.roll)
         {
@@ -301,44 +297,41 @@ void insertionSort(struct Student s[], int n)
     }
 }
 
-/* Selection Sort */
 void selectionSort(struct Student s[], int n)
 {
-    for (int i = 0; i < n - 1; i++)
-    {
-        int min = i;
+    int i, j, min;
+    struct Student temp;
 
-        for (int j = i + 1; j < n; j++)
-        {
+    for (i = 0; i < n - 1; i++)
+    {
+        min = i;
+
+        for (j = i + 1; j < n; j++)
             if (s[j].roll < s[min].roll)
                 min = j;
-        }
 
-        if (min != i)
-        {
-            struct Student temp = s[i];
-            s[i] = s[min];
-            s[min] = temp;
-        }
+        temp = s[i];
+        s[i] = s[min];
+        s[min] = temp;
     }
 }
 
-/* Shell Sort */
 void shellSort(struct Student s[], int n)
 {
-    for (int gap = n / 2; gap > 0; gap /= 2)
+    int gap, i, j;
+    struct Student temp;
+
+    for (gap = n / 2; gap > 0; gap = gap / 2)
     {
-
-        for (int i = gap; i < n; i++)
+        for (i = gap; i < n; i++)
         {
-            struct Student temp = s[i];
-            int j = i;
+            temp = s[i];
+            j = i;
 
-            while (j >= gap &&
-                   s[j - gap].roll > temp.roll)
+            while (j >= gap && s[j - gap].roll > temp.roll)
             {
                 s[j] = s[j - gap];
-                j -= gap;
+                j = j - gap;
             }
 
             s[j] = temp;
@@ -349,98 +342,88 @@ void shellSort(struct Student s[], int n)
 int main()
 {
     struct Student s[MAX];
-    int n, choice, key, pos;
+    int n, i, choice, key, pos;
 
     printf("Enter number of students: ");
     scanf("%d", &n);
 
-    printf("\nEnter student details:\n");
-
-    for (int i = 0; i < n; i++)
+    if (n < 1 || n > MAX)
     {
-        printf("\nStudent %d\n", i + 1);
+        printf("Invalid number of students.\n");
+        return 0;
+    }
 
-        printf("Roll No: ");
-        scanf("%d", &s[i].roll);
-
-        printf("Name: ");
-        scanf("%s", s[i].name);
-
-        printf("Marks: ");
-        scanf("%f", &s[i].marks);
+    for (i = 0; i < n; i++)
+    {
+        printf("\nEnter roll number, name and marks:\n");
+        scanf("%d %49s %f", &s[i].roll, s[i].name, &s[i].marks);
     }
 
     do
     {
-        printf("\n===== MENU =====\n");
-        printf("1. Display Records\n");
-        printf("2. Linear Search\n");
-        printf("3. Insertion Sort\n");
-        printf("4. Selection Sort\n");
-        printf("5. Shell Sort\n");
-        printf("6. Binary Search\n");
-        printf("7. Exit\n");
+        printf("\n1. Display");
+        printf("\n2. Linear Search");
+        printf("\n3. Insertion Sort");
+        printf("\n4. Selection Sort");
+        printf("\n5. Shell Sort");
+        printf("\n6. Binary Search");
+        printf("\n7. Exit");
 
-        printf("Enter choice: ");
+        printf("\nEnter choice: ");
         scanf("%d", &choice);
 
         switch (choice)
         {
+            case 1:
+                display(s, n);
+                break;
 
-        case 1:
-            display(s, n);
-            break;
+            case 2:
+                printf("Enter roll number: ");
+                scanf("%d", &key);
 
-        case 2:
-            printf("Enter roll number to search: ");
-            scanf("%d", &key);
+                pos = linearSearch(s, n, key);
 
-            pos = linearSearch(s, n, key);
+                if (pos == -1)
+                    printf("Student not found.\n");
+                else
+                    printf("Student found at position %d.\n", pos + 1);
+                break;
 
-            if (pos != -1)
-                printf("Student found at position %d.\n", pos + 1);
-            else
-                printf("Student not found.\n");
+            case 3:
+                insertionSort(s, n);
+                display(s, n);
+                break;
 
-            break;
+            case 4:
+                selectionSort(s, n);
+                display(s, n);
+                break;
 
-        case 3:
-            insertionSort(s, n);
-            printf("\nRecords sorted using Insertion Sort:\n");
-            display(s, n);
-            break;
+            case 5:
+                shellSort(s, n);
+                display(s, n);
+                break;
 
-        case 4:
-            selectionSort(s, n);
-            printf("\nRecords sorted using Selection Sort:\n");
-            display(s, n);
-            break;
+            case 6:
+                insertionSort(s, n);
+                printf("Enter roll number: ");
+                scanf("%d", &key);
 
-        case 5:
-            shellSort(s, n);
-            printf("\nRecords sorted using Shell Sort:\n");
-            display(s, n);
-            break;
+                pos = binarySearch(s, n, key);
 
-        case 6:
-            printf("Enter roll number to search: ");
-            scanf("%d", &key);
+                if (pos == -1)
+                    printf("Student not found.\n");
+                else
+                    printf("Student found at position %d.\n", pos + 1);
+                break;
 
-            pos = binarySearch(s, n, key);
+            case 7:
+                printf("Program terminated.\n");
+                break;
 
-            if (pos != -1)
-                printf("Student found at position %d.\n", pos + 1);
-            else
-                printf("Student not found.\n");
-
-            break;
-
-        case 7:
-            printf("Program terminated.\n");
-            break;
-
-        default:
-            printf("Invalid choice.\n");
+            default:
+                printf("Invalid choice.\n");
         }
 
     } while (choice != 7);
@@ -521,176 +504,168 @@ gcc combi_sparse.c -o combi_sparse -Wall
 
 ```c
 #include <stdio.h>
+void accept(int a[10][10], int rows, int coln);
+void declare(int a[10][10], int rows, int coln);
+void compact(int a[10][10], int rows, int coln, int s[20][3]);
+void simpletranspose(int nz, int s[20][3]);
+void fasttranspose(int nz, int s[20][3]);
 
-void accept(int a[10][10], int m, int n);
-void displayMatrix(int a[10][10], int m, int n);
-void sparse(int a[10][10], int b[20][3], int m, int n);
-void displayTriplet(int b[20][3]);
-void simpleTranspose(int a[20][3], int b[20][3]);
-void fastTranspose(int a[20][3], int b[20][3]);
-
-int main()
-{
-    int matrix[10][10];
-    int sparseMatrix[20][3];
-    int simple[20][3];
-    int fast[20][3];
-    int rows, cols;
-
-    printf("Enter number of rows: ");
-    scanf("%d", &rows);
-
-    printf("Enter number of columns: ");
-    scanf("%d", &cols);
-
-    accept(matrix, rows, cols);
-
-    printf("\nOriginal Matrix:\n");
-    displayMatrix(matrix, rows, cols);
-
-    sparse(matrix, sparseMatrix, rows, cols);
-
-    printf("\nSparse (Triplet) Matrix:\n");
-    displayTriplet(sparseMatrix);
-
-    simpleTranspose(sparseMatrix, simple);
-
-    printf("\nSimple Transpose:\n");
-    displayTriplet(simple);
-
-    fastTranspose(sparseMatrix, fast);
-
-    printf("\nFast Transpose:\n");
-    displayTriplet(fast);
-
-    return 0;
-}
-
-// Accept Matrix
-void accept(int a[10][10], int m, int n)
+void accept(int a[10][10], int rows, int coln)
 {
     int i, j;
-
-    printf("\nEnter Matrix Elements:\n");
-
-    for (i = 0; i < m; i++)
+    for (i = 0; i < rows; i++)
     {
-        for (j = 0; j < n; j++)
+        for (j = 0; j < coln; j++)
         {
-            printf("Element[%d][%d]: ", i, j);
+            printf("Enter a no:");
             scanf("%d", &a[i][j]);
         }
     }
 }
-
-// Display Original Matrix
-void displayMatrix(int a[10][10], int m, int n)
+void declare(int a[10][10], int rows, int coln)
 {
     int i, j;
-
-    for (i = 0; i < m; i++)
+    printf("The matrix is:\n");
+    for (i = 0; i < rows; i++)
     {
-        for (j = 0; j < n; j++)
+        for (j = 0; j < coln; j++)
         {
-            printf("%d\t", a[i][j]);
+            printf("\t%d", a[i][j]);
         }
         printf("\n");
     }
 }
-
-// Convert Matrix to Sparse Triplet
-void sparse(int a[10][10], int b[20][3], int m, int n)
+void compact(int a[10][10], int rows, int coln, int s[20][3])
 {
-    int i, j;
-    int k = 1;
-
-    for (i = 0; i < m; i++)
+    int i, j, z = 0, nz = 0;
+    for (i = 0; i < rows; i++)
     {
-        for (j = 0; j < n; j++)
+        for (j = 0; j < coln; j++)
         {
-            if (a[i][j] != 0)
+            if (a[i][j] == 0)
+                z++;
+            else
+                nz++;
+        }
+    }
+    if (nz > z)
+    {
+        printf("It is not a sparse matrix\n");
+    }
+    else
+    {
+        s[0][0] = rows;
+        s[0][1] = coln;
+        s[0][2] = nz;
+        int k = 1;
+        for (i = 0; i < rows; i++)
+        {
+            for (j = 0; j < coln; j++)
             {
-                b[k][0] = i;
-                b[k][1] = j;
-                b[k][2] = a[i][j];
+                if (a[i][j] != 0)
+                {
+                    s[k][0] = i;
+                    s[k][1] = j;
+                    s[k][2] = a[i][j];
+                    k++;
+                }
+            }
+        }
+        printf("\nThe sparse matrix is:\n");
+        printf("row\tcol\tvalue\n");
+        for (i = 0; i < nz + 1; i++)
+        {
+            for (j = 0; j < 3; j++)
+            {
+                printf("%d\t", s[i][j]);
+            }
+            printf("\n");
+        }
+    }
+}
+void simpletranspose(int nz, int s[20][3])
+{
+    int t[20][3];
+    int i, j, k = 1;
+    t[0][0] = s[0][1];
+    t[0][1] = s[0][0];
+    t[0][2] = s[0][2];
+
+    for (i = 0; i < s[0][1]; i++)
+    {
+        for (j = 1; j <= nz; j++)
+        {
+            if (s[j][1] == i)
+            {
+                t[k][0] = s[j][1];
+                t[k][1] = s[j][0];
+                t[k][2] = s[j][2];
                 k++;
             }
         }
     }
-
-    b[0][0] = m;
-    b[0][1] = n;
-    b[0][2] = k - 1;
+    printf("\nThe Simple transpose is :\n");
+    printf("row\tcol\tvalue\n");
+    for (i = 0; i < nz + 1; i++)
+    {
+        for (j = 0; j < 3; j++)
+        {
+            printf("%d\t", t[i][j]);
+        }
+        printf("\n");
+    }
 }
-
-// Display Triplet Matrix
-void displayTriplet(int b[20][3])
+void fasttranspose(int nz, int s[20][3])
 {
-    int i;
-
+    int t[20][3];
+    int S[20] = {0}, T[20] = {0};
+    int i, j;
+    t[0][0] = s[0][1];
+    t[0][1] = s[0][0];
+    t[0][2] = s[0][2];
+    if (nz == 0)
+    {
+        printf("\nFast transpose is:\n");
+        printf("%d\t%d\t%d\n", t[0][0], t[0][1], t[0][2]);
+        return;
+    }
+    for (i = 0; i < s[0][1]; i++)
+        S[i] = 0;
+    for (i = 1; i <= nz; i++)
+        S[s[i][1]]++;
+    T[0] = 1;
+    for (i = 1; i < s[0][1]; i++)
+        T[i] = T[i - 1] + S[i - 1];
+    for (i = 1; i <= nz; i++)
+    {
+        j = T[s[i][1]];
+        t[j][0] = s[i][1];
+        t[j][1] = s[i][0];
+        t[j][2] = s[i][2];
+        T[s[i][1]]++;
+    }
+    printf("\nThe Fast Transpose is:\n");
     printf("Row\tCol\tValue\n");
 
-    for (i = 0; i <= b[0][2]; i++)
+    for (i = 0; i <= nz; i++)
     {
-        printf("%d\t%d\t%d\n", b[i][0], b[i][1], b[i][2]);
+        printf("%d\t%d\t%d\n", t[i][0], t[i][1], t[i][2]);
     }
 }
-
-// Simple Transpose
-void simpleTranspose(int a[20][3], int b[20][3])
+int main()
 {
-    int i, j, k = 1;
-
-    b[0][0] = a[0][1];
-    b[0][1] = a[0][0];
-    b[0][2] = a[0][2];
-
-    for (i = 0; i < a[0][1]; i++)
-    {
-        for (j = 1; j <= a[0][2]; j++)
-        {
-            if (a[j][1] == i)
-            {
-                b[k][0] = a[j][1];
-                b[k][1] = a[j][0];
-                b[k][2] = a[j][2];
-                k++;
-            }
-        }
-    }
-}
-
-// Fast Transpose
-void fastTranspose(int a[20][3], int b[20][3])
-{
-    int rowTerms[20], startPos[20];
-    int i, j;
-
-    b[0][0] = a[0][1];
-    b[0][1] = a[0][0];
-    b[0][2] = a[0][2];
-
-    for (i = 0; i < a[0][1]; i++)
-        rowTerms[i] = 0;
-
-    for (i = 1; i <= a[0][2]; i++)
-        rowTerms[a[i][1]]++;
-
-    startPos[0] = 1;
-
-    for (i = 1; i < a[0][1]; i++)
-        startPos[i] = startPos[i - 1] + rowTerms[i - 1];
-
-    for (i = 1; i <= a[0][2]; i++)
-    {
-        j = startPos[a[i][1]];
-
-        b[j][0] = a[i][1];
-        b[j][1] = a[i][0];
-        b[j][2] = a[i][2];
-
-        startPos[a[i][1]]++;
-    }
+    int a[10][10], rows, coln, i, j;
+    int s[20][3];
+    int nz;
+    printf("Enter no of rows and columns:");
+    scanf("%d%d", &rows, &coln);
+    accept(a, rows, coln);
+    declare(a, rows, coln);
+    compact(a, rows, coln, s);
+    nz = s[0][2];
+    simpletranspose(nz, s);
+    fasttranspose(nz, s);
+    return 0;
 }
 ```
 
@@ -943,7 +918,7 @@ int main()
 
 ## Linear queue
 
-Array-based queue for print jobs, with MAX = 5. Once rear reaches the end of the array the queue reports overflow, even if slots at the front were freed. That limitation is what the circular queue fixes.
+Two array-based queues, both with MAX = 5. `linear_queue.c` stores print-job records; `linear_queue_simple.c` is the minimal integer version. Once `rear` reaches the end of the array the queue reports overflow, even if slots at the front were freed. That limitation is what the circular queue fixes.
 
 ### `linear_queue.c`
 
@@ -1081,11 +1056,110 @@ int main()
 }
 ```
 
+### `linear_queue_simple.c`
+
+**What it does:** Minimal integer linear queue: insert, delete and display.
+
+```powershell
+gcc linear_queue_simple.c -o linear_queue_simple -Wall
+.\linear_queue_simple.exe
+```
+
+```c
+#include <stdio.h>
+
+#define MAX 5
+
+int queue[MAX];
+int front = -1, rear = -1;
+
+/* Add an item at the rear */
+void enqueue()
+{
+    int value;
+
+    if (rear == MAX - 1)
+    {
+        printf("Queue Overflow!\n");
+        return;
+    }
+
+    printf("Enter value: ");
+    scanf("%d", &value);
+
+    if (front == -1)          /* first item */
+        front = 0;
+
+    rear++;
+    queue[rear] = value;
+    printf("%d inserted.\n", value);
+}
+
+/* Remove the item at the front */
+void dequeue()
+{
+    if (front == -1)
+    {
+        printf("Queue Underflow!\n");
+        return;
+    }
+
+    printf("Deleted: %d\n", queue[front]);
+    front++;
+
+    if (front > rear)         /* last item removed */
+    {
+        front = -1;
+        rear = -1;
+    }
+}
+
+/* Print items from front to rear */
+void display()
+{
+    int i;
+
+    if (front == -1)
+    {
+        printf("Queue is empty.\n");
+        return;
+    }
+
+    printf("Queue: ");
+    for (i = front; i <= rear; i++)
+        printf("%d ", queue[i]);
+    printf("\n");
+}
+
+int main()
+{
+    int choice;
+
+    do
+    {
+        printf("\n1.Insert  2.Delete  3.Display  4.Exit\n");
+        printf("Choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1: enqueue(); break;
+        case 2: dequeue(); break;
+        case 3: display(); break;
+        case 4: printf("Bye.\n"); break;
+        default: printf("Invalid choice.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
+```
+
 ---
 
 ## Circular queue
 
-Array-based circular queue for print jobs, also MAX = 5. Modulo arithmetic reuses freed slots, and the queue counts as full when (rear + 1) % MAX == front. Because empty is tracked with front = -1, all 5 slots are usable.
+Two array-based circular queues, both MAX = 5. `circular_queue.c` stores print-job records; `circular_queue_simple.c` is the minimal integer version. Modulo arithmetic reuses freed slots, and the queue counts as full when `(rear + 1) % MAX == front`. Because empty is tracked with `front = -1`, all 5 slots are usable.
 
 ### `circular_queue.c`
 
@@ -1215,6 +1289,124 @@ int main() {
                 printf("Invalid choice!\n");
         }
 
+    } while (choice != 4);
+
+    return 0;
+}
+```
+
+### `circular_queue_simple.c`
+
+**What it does:** Minimal integer circular queue with wrap-around insert, delete and display.
+
+```powershell
+gcc circular_queue_simple.c -o circular_queue_simple -Wall
+.\circular_queue_simple.exe
+```
+
+```c
+#include <stdio.h>
+
+#define MAX 5
+
+int queue[MAX];
+int front = -1, rear = -1;
+
+/* Add an item at the rear (wraps around) */
+void enqueue()
+{
+    int value;
+
+    if ((rear + 1) % MAX == front)
+    {
+        printf("Queue Overflow!\n");
+        return;
+    }
+
+    printf("Enter value: ");
+    scanf("%d", &value);
+
+    if (front == -1)          /* first item */
+    {
+        front = 0;
+        rear = 0;
+    }
+    else
+    {
+        rear = (rear + 1) % MAX;
+    }
+
+    queue[rear] = value;
+    printf("%d inserted.\n", value);
+}
+
+/* Remove the item at the front */
+void dequeue()
+{
+    if (front == -1)
+    {
+        printf("Queue Underflow!\n");
+        return;
+    }
+
+    printf("Deleted: %d\n", queue[front]);
+
+    if (front == rear)        /* last item removed */
+    {
+        front = -1;
+        rear = -1;
+    }
+    else
+    {
+        front = (front + 1) % MAX;
+    }
+}
+
+/* Print items from front to rear, wrapping around */
+void display()
+{
+    int i;
+
+    if (front == -1)
+    {
+        printf("Queue is empty.\n");
+        return;
+    }
+
+    printf("Queue: ");
+    i = front;
+
+    while (1)
+    {
+        printf("%d ", queue[i]);
+
+        if (i == rear)
+            break;
+
+        i = (i + 1) % MAX;
+    }
+
+    printf("\n");
+}
+
+int main()
+{
+    int choice;
+
+    do
+    {
+        printf("\n1.Insert  2.Delete  3.Display  4.Exit\n");
+        printf("Choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1: enqueue(); break;
+        case 2: dequeue(); break;
+        case 3: display(); break;
+        case 4: printf("Bye.\n"); break;
+        default: printf("Invalid choice.\n");
+        }
     } while (choice != 4);
 
     return 0;

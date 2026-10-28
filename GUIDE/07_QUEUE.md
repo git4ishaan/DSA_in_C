@@ -1,9 +1,14 @@
 # 07 — Queue: Linear and Circular
 
-**Files:** `linear_queue.c`, `circular_queue.c`
+**Files:** `linear_queue.c`, `linear_queue_simple.c`, `circular_queue.c`, `circular_queue_simple.c`
 **Exam value:** high. The standard question is *"implement a queue using an array and
 explain the drawback of a linear queue"* — the circular queue is the answer to the
 drawback.
+
+Each queue comes in two versions: the record-based `linear_queue.c` / `circular_queue.c`
+(a printer job queue using a `struct`) and the minimal integer version
+`linear_queue_simple.c` / `circular_queue_simple.c`. The operations and state rules are
+identical — only the stored type and the amount of output differ.
 
 ---
 
@@ -159,6 +164,21 @@ edge of the array.
 assignment. That works in C because structs are assignable. In an exam this is a nice
 touch: *"A queue of structs stores complete records, so the ID and title stay together."*
 
+### How `linear_queue_simple.c` is built
+
+The same program reduced to its essentials, storing plain `int`s:
+
+| Lines | What |
+|-------|------|
+| 3–6 | `#define MAX 5`, `int queue[MAX]`, `front = rear = -1` |
+| 9–28 | `enqueue`: overflow check, read value, first-item special case, `rear++` |
+| 31–47 | `dequeue`: underflow check, print value, `front++`, reset if now empty |
+| 50–64 | `display`: `for (i = front; i <= rear; i++)` |
+| 66–87 | compact menu loop |
+
+Use this version when the exam asks for a queue of **integers**; use the record version
+when it asks for a queue of **objects/records**.
+
 ---
 
 # Part B — Circular queue
@@ -286,6 +306,16 @@ while (1)
 | 42–58 | `dequeue`: empty check, last-item special case, `front = (front+1)%MAX` |
 | 61–82 | `display`: wrap-around traversal |
 | 85–122 | menu |
+
+### How `circular_queue_simple.c` is built
+
+| Lines | What |
+|-------|------|
+| 3–6 | `#define MAX 5`, `int queue[MAX]`, `front = rear = -1` |
+| 9–34 | `enqueue`: `(rear+1)%MAX == front` check, first item, wrap on insert |
+| 37–56 | `dequeue`: empty check, last item resets both indices, wrap on removal |
+| 59–83 | `display`: start at `front`, stop after printing `rear`, wrap in between |
+| 85–106 | compact menu loop |
 
 ## The `front == rear` special case
 

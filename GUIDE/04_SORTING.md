@@ -1,6 +1,7 @@
 # 04 — Sorting: Bubble, Selection, Insertion, Shell
 
-**Files:** `bubble_sort.c`, `selection_sort.c`, `Searching_sorting.c`
+**Files:** `bubble_sort.c`, `Searching_sorting.c`
+**Code snippets:** the old standalone `selection_sort.c` is in the git history; `Searching_sorting.c` now contains insertion, selection and shell sort.
 **Exam value:** extremely high. "Write an algorithm to sort n numbers" is almost
 guaranteed to appear in some form.
 
@@ -171,7 +172,7 @@ Complexity: **O(n²) in all cases** (it always scans the rest, even if sorted).
 Swaps: at most `n−1`. Space O(1). **Not stable** (a long-distance swap can jump an
 equal element over its twin).
 
-## Code (`selection_sort.c`)
+## Code (selection-sort pattern)
 
 ```c
 for (i = 0; i < n - 1; i++)

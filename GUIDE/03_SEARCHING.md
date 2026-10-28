@@ -1,6 +1,7 @@
 # 03 — Searching: Linear and Binary
 
-**Files:** `linear_search.c`, `binary_search.c`, `Searching_sorting.c`
+**Files:** `Searching_sorting.c`
+**Code snippets:** the old standalone `linear_search.c` / `binary_search.c` are in the git history; the same logic now lives in `Searching_sorting.c`.
 **One-line difference:** linear search checks every element; binary search throws away
 half the array each step — but **only works on sorted data**.
 
@@ -58,7 +59,7 @@ Step 8: Stop
 
 **Complexity:** best O(1), worst O(n), average O(n). Space O(1).
 
-## Code (from `linear_search.c`)
+## Code (linear-search pattern)
 
 ```c
 for (i = 0; i < n; i++)
@@ -214,7 +215,7 @@ in viva, it is exactly the kind of comparison examiners like.
 
 ## How your files implement it
 
-`binary_search.c` — whole program in `main`, assumes the user types sorted input.
+The old standalone `binary_search.c` (git history) was a whole program in `main` that assumed sorted input.
 Correct `while (low <= high)` loop.
 
 `Searching_sorting.c` — same logic but on an **array of structs**, comparing
