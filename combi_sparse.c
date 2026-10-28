@@ -1,172 +1,164 @@
 #include <stdio.h>
+void accept(int a[10][10], int rows, int coln);
+void declare(int a[10][10], int rows, int coln);
+void compact(int a[10][10], int rows, int coln, int s[20][3]);
+void simpletranspose(int nz, int s[20][3]);
+void fasttranspose(int nz, int s[20][3]);
 
-void accept(int a[10][10], int m, int n);
-void displayMatrix(int a[10][10], int m, int n);
-void sparse(int a[10][10], int b[20][3], int m, int n);
-void displayTriplet(int b[20][3]);
-void simpleTranspose(int a[20][3], int b[20][3]);
-void fastTranspose(int a[20][3], int b[20][3]);
-
-int main()
-{
-    int matrix[10][10];
-    int sparseMatrix[20][3];
-    int simple[20][3];
-    int fast[20][3];
-    int rows, cols;
-
-    printf("Enter number of rows: ");
-    scanf("%d", &rows);
-
-    printf("Enter number of columns: ");
-    scanf("%d", &cols);
-
-    accept(matrix, rows, cols);
-
-    printf("\nOriginal Matrix:\n");
-    displayMatrix(matrix, rows, cols);
-
-    sparse(matrix, sparseMatrix, rows, cols);
-
-    printf("\nSparse (Triplet) Matrix:\n");
-    displayTriplet(sparseMatrix);
-
-    simpleTranspose(sparseMatrix, simple);
-
-    printf("\nSimple Transpose:\n");
-    displayTriplet(simple);
-
-    fastTranspose(sparseMatrix, fast);
-
-    printf("\nFast Transpose:\n");
-    displayTriplet(fast);
-
-    return 0;
-}
-
-// Accept Matrix
-void accept(int a[10][10], int m, int n)
+void accept(int a[10][10], int rows, int coln)
 {
     int i, j;
-
-    printf("\nEnter Matrix Elements:\n");
-
-    for (i = 0; i < m; i++)
+    for (i = 0; i < rows; i++)
     {
-        for (j = 0; j < n; j++)
+        for (j = 0; j < coln; j++)
         {
-            printf("Element[%d][%d]: ", i, j);
+            printf("Enter a no:");
             scanf("%d", &a[i][j]);
         }
     }
 }
-
-// Display Original Matrix
-void displayMatrix(int a[10][10], int m, int n)
+void declare(int a[10][10], int rows, int coln)
 {
     int i, j;
-
-    for (i = 0; i < m; i++)
+    printf("The matrix is:\n");
+    for (i = 0; i < rows; i++)
     {
-        for (j = 0; j < n; j++)
+        for (j = 0; j < coln; j++)
         {
-            printf("%d\t", a[i][j]);
+            printf("\t%d", a[i][j]);
         }
         printf("\n");
     }
 }
-
-// Convert Matrix to Sparse Triplet
-void sparse(int a[10][10], int b[20][3], int m, int n)
+void compact(int a[10][10], int rows, int coln, int s[20][3])
 {
-    int i, j;
-    int k = 1;
-
-    for (i = 0; i < m; i++)
+    int i, j, z = 0, nz = 0;
+    for (i = 0; i < rows; i++)
     {
-        for (j = 0; j < n; j++)
+        for (j = 0; j < coln; j++)
         {
-            if (a[i][j] != 0)
+            if (a[i][j] == 0)
+                z++;
+            else
+                nz++;
+        }
+    }
+    if (nz > z)
+    {
+        printf("It is not a sparse matrix\n");
+    }
+    else
+    {
+        s[0][0] = rows;
+        s[0][1] = coln;
+        s[0][2] = nz;
+        int k = 1;
+        for (i = 0; i < rows; i++)
+        {
+            for (j = 0; j < coln; j++)
             {
-                b[k][0] = i;
-                b[k][1] = j;
-                b[k][2] = a[i][j];
+                if (a[i][j] != 0)
+                {
+                    s[k][0] = i;
+                    s[k][1] = j;
+                    s[k][2] = a[i][j];
+                    k++;
+                }
+            }
+        }
+        printf("\nThe sparse matrix is:\n");
+        printf("row\tcol\tvalue\n");
+        for (i = 0; i < nz + 1; i++)
+        {
+            for (j = 0; j < 3; j++)
+            {
+                printf("%d\t", s[i][j]);
+            }
+            printf("\n");
+        }
+    }
+}
+void simpletranspose(int nz, int s[20][3])
+{
+    int t[20][3];
+    int i, j, k = 1;
+    t[0][0] = s[0][1];
+    t[0][1] = s[0][0];
+    t[0][2] = s[0][2];
+
+    for (i = 0; i < s[0][1]; i++)
+    {
+        for (j = 1; j <= nz; j++)
+        {
+            if (s[j][1] == i)
+            {
+                t[k][0] = s[j][1];
+                t[k][1] = s[j][0];
+                t[k][2] = s[j][2];
                 k++;
             }
         }
     }
-
-    b[0][0] = m;
-    b[0][1] = n;
-    b[0][2] = k - 1;
+    printf("\nThe Simple transpose is :\n");
+    printf("row\tcol\tvalue\n");
+    for (i = 0; i < nz + 1; i++)
+    {
+        for (j = 0; j < 3; j++)
+        {
+            printf("%d\t", t[i][j]);
+        }
+        printf("\n");
+    }
 }
-
-// Display Triplet Matrix
-void displayTriplet(int b[20][3])
+void fasttranspose(int nz, int s[20][3])
 {
-    int i;
-
+    int t[20][3];
+    int S[20] = {0}, T[20] = {0};
+    int i, j;
+    t[0][0] = s[0][1];
+    t[0][1] = s[0][0];
+    t[0][2] = s[0][2];
+    if (nz == 0)
+    {
+        printf("\nFast transpose is:\n");
+        printf("%d\t%d\t%d\n", t[0][0], t[0][1], t[0][2]);
+        return;
+    }
+    for (i = 0; i < s[0][1]; i++)
+        S[i] = 0;
+    for (i = 1; i <= nz; i++)
+        S[s[i][1]]++;
+    T[0] = 1;
+    for (i = 1; i < s[0][1]; i++)
+        T[i] = T[i - 1] + S[i - 1];
+    for (i = 1; i <= nz; i++)
+    {
+        j = T[s[i][1]];
+        t[j][0] = s[i][1];
+        t[j][1] = s[i][0];
+        t[j][2] = s[i][2];
+        T[s[i][1]]++;
+    }
+    printf("\nThe Fast Transpose is:\n");
     printf("Row\tCol\tValue\n");
 
-    for (i = 0; i <= b[0][2]; i++)
+    for (i = 0; i <= nz; i++)
     {
-        printf("%d\t%d\t%d\n", b[i][0], b[i][1], b[i][2]);
+        printf("%d\t%d\t%d\n", t[i][0], t[i][1], t[i][2]);
     }
 }
-
-// Simple Transpose
-void simpleTranspose(int a[20][3], int b[20][3])
+int main()
 {
-    int i, j, k = 1;
-
-    b[0][0] = a[0][1];
-    b[0][1] = a[0][0];
-    b[0][2] = a[0][2];
-
-    for (i = 0; i < a[0][1]; i++)
-    {
-        for (j = 1; j <= a[0][2]; j++)
-        {
-            if (a[j][1] == i)
-            {
-                b[k][0] = a[j][1];
-                b[k][1] = a[j][0];
-                b[k][2] = a[j][2];
-                k++;
-            }
-        }
-    }
-}
-
-// Fast Transpose
-void fastTranspose(int a[20][3], int b[20][3])
-{
-    int rowTerms[20], startPos[20];
-    int i, j;
-
-    b[0][0] = a[0][1];
-    b[0][1] = a[0][0];
-    b[0][2] = a[0][2];
-
-    for (i = 0; i < a[0][1]; i++)
-        rowTerms[i] = 0;
-
-    for (i = 1; i <= a[0][2]; i++)
-        rowTerms[a[i][1]]++;
-
-    startPos[0] = 1;
-
-    for (i = 1; i < a[0][1]; i++)
-        startPos[i] = startPos[i - 1] + rowTerms[i - 1];
-
-    for (i = 1; i <= a[0][2]; i++)
-    {
-        j = startPos[a[i][1]];
-
-        b[j][0] = a[i][1];
-        b[j][1] = a[i][0];
-        b[j][2] = a[i][2];
-
-        startPos[a[i][1]]++;
-    }
+    int a[10][10], rows, coln, i, j;
+    int s[20][3];
+    int nz;
+    printf("Enter no of rows and columns:");
+    scanf("%d%d", &rows, &coln);
+    accept(a, rows, coln);
+    declare(a, rows, coln);
+    compact(a, rows, coln, s);
+    nz = s[0][2];
+    simpletranspose(nz, s);
+    fasttranspose(nz, s);
+    return 0;
 }
