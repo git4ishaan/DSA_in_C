@@ -132,7 +132,7 @@ while (p != head)
 free(head);
 ```
 
-Your `freeList()` in `circlell.c` does exactly this and handles the single-node case
+Your `freeList()` in `circlell.c` does exactly this and handles the empty-list case
 correctly: when `head->next == head`, `p` equals `head`, the loop body never runs, and
 `head` is freed. No leak. Good.
 
@@ -177,7 +177,8 @@ Terms are stored in **descending order of exponent**. This is not cosmetic — i
 makes addition a linear merge, exactly like merging two sorted arrays. Polynomial 3:
 `3x² + 2x + 1` is stored 2, 1, 0.
 
-**Header node variant:** `poly_add.c` uses a **dummy header node**:
+**Header node variant:** both `poly_add.c` and the simplified `circlell.c` use a
+**dummy header node**:
 
 ```
 head -> [dummy] -> [3,2] -> [2,1] -> [1,0] -> back to head
@@ -185,7 +186,6 @@ head -> [dummy] -> [3,2] -> [2,1] -> [1,0] -> back to head
 
 Benefits: the list is never truly empty (`head->next == head`), and insertion before the
 first real term is the same as insertion anywhere else — no special case, no `Node **head`.
-That is why `poly_add.c` (the autograder template) is cleaner than `circlell.c`.
 
 ---
 
@@ -269,8 +269,8 @@ result. For small polynomials (exam examples) that is irrelevant, but the merge 
 the answer to *"what is the complexity of polynomial addition?"*.
 
 If an examiner asks: *"Can you do it in O(m+n)?"* — say yes, and describe the merge.
-Both answers are in your files: `circlell.c` uses the merge-shaped loop,
-`poly_add.c` uses the insert-each-term method.
+Both answers are in your files: the merge algorithm above, and the insert-each-term
+method used by `circlell.c` and `poly_add.c`.
 
 ---
 
@@ -337,63 +337,45 @@ SUM = +7x^2
 The `+6` proves duplicates were combined inside **one** polynomial; the missing `x^0`
 term in SUM proves `-5 + 5 = 0` was **removed**, as required.
 
-## `circlell.c` — the version without a header node
+## `circlell.c` — same header-node idea, readable output
 
-Same idea, but the ring has no dummy node, so insertion at the front needs the
-"find the last node" step. The merge in `add()` uses `da`/`db` flags to detect when a
-list has wrapped around.
+`circlell.c` uses the same header-node insertion as `poly_add.c`. The difference is only
+the input/output: it prompts for each polynomial and prints terms in a human-readable
+form (`3x^2 + 2x + 5`) instead of `+3x^2 +2x^1 +5x^0`.
 
-### ⚠️ A real bug that was in `circlell.c` (now fixed)
+| Lines | Function | What |
+|-------|----------|------|
+| 11–26 | `newList()` | allocate the header, `head->next = head` |
+| 28–65 | `insert()` | descending order, combine equal exponents, delete zero results |
+| 67–80 | `create()` | read `n`, then `n` coefficient/exponent pairs |
+| 82–126 | `display()` | signs, coefficient 1, exponent 0/1 special cases |
+| 128–140 | `add()` | new list; insert every term of both inputs |
+| 142–154 | `freeList()` | free all nodes including the header |
+| 156–182 | `main()` | create both, display, add, display, free |
 
-The original `else` branch of `insert()` was:
+**Why the header makes it shorter:** with no header, inserting at the front and deleting
+the first node need special cases, and `head` itself can change. With a header, every real
+node has a predecessor, so the same `prev`/`cur` code works everywhere. This also removes
+the old "came back to `head` after a full circle?" ambiguity entirely.
 
-```c
-else
-{
-    n->next = p;
-    prev->next = n;
-    if (p == *head)
-        *head = n;        /* WRONG in one case */
-}
-```
-
-That branch runs in two different situations:
-
-1. Inserting **between two nodes** → `p != *head`, fine.
-2. The loop **wrapped all the way around** because the new exponent is the
-   **smallest** → `p == *head` and `prev` is the **last** node. Here the node should be
-   **appended after `prev`**, with `head` unchanged. But the old code moved `head` to the
-   new node, so the smallest exponent ended up **first**, breaking the descending order.
-
-Symptoms (before the fix):
+**Tested outputs:**
 
 ```
-P1 entered as 1 + x^2          -> printed "1 + x^2"        (should be "x^2 + 1")
-Sum = x^2 + 1 + x              -> not descending           (should be "x^2 + x + 1")
+P1 = 3x^2 + 2x + 5
+P2 = -3x^2 + x - 5
+Sum = 3x
 ```
 
-The fix is to **delete the head update** in that branch:
+and
 
-```c
-else
-{
-    n->next = p;
-    prev->next = n;
-    /* do NOT move *head here */
-}
+```
+P1 = x^2 - x + 1
+P2 = 0
+Sum = x^2 - x + 1
 ```
 
-Why is it safe? The case "insert before the head because the exponent is largest" is
-already handled by the earlier `else if (p == *head && prev == NULL)` branch. So the
-`p == *head` test in the `else` branch can only mean "wrapped around", where the head
-must stay put.
-
-After the fix, all three test polynomials print in correct descending order, and full
-cancellation prints `0`.
-
-**The lesson to say in viva:** *"In a circular list, `p == head` is ambiguous: it can mean
-'found the head' or 'came back to the head after a full circle'. The `prev` pointer
-disambiguates them — `prev == NULL` means we are at the head on the first visit."*
+The first test proves equal exponents combine and the constants cancel. The second proves
+an empty polynomial prints `0` and the `+`/`-` signs are correct.
 
 ### `poly_add_menu.c`
 

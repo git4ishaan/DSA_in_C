@@ -1,80 +1,79 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct Student
+typedef struct Student
 {
     int regNo;
     char name[50];
     struct Student *next;
-};
+} Student;
 
-struct Student *head = NULL;
+Student *head = NULL;
 
-void addStudent()
+void addStudent(void)
 {
-    struct Student *newNode, *temp;
-    newNode = (struct Student *)malloc(sizeof(struct Student));
+    Student *s = malloc(sizeof(Student));
 
-    if (newNode == NULL)
+    if (s == NULL)
     {
         printf("Memory allocation failed.\n");
         return;
     }
 
     printf("Enter Registration Number: ");
-    scanf("%d", &newNode->regNo);
+    scanf("%d", &s->regNo);
     printf("Enter Name: ");
-    scanf(" %49[^\n]", newNode->name);
-    newNode->next = NULL;
+    scanf(" %49[^\n]", s->name);
+    s->next = NULL;
 
     if (head == NULL)
-        head = newNode;
+    {
+        head = s;
+    }
     else
     {
-        temp = head;
-        while (temp->next != NULL)
-            temp = temp->next;
-        temp->next = newNode;
+        Student *p = head;
+        while (p->next != NULL)
+            p = p->next;
+        p->next = s;
     }
 
     printf("Student added successfully.\n");
 }
 
-void removeStudent()
+void removeStudent(void)
 {
-    struct Student *temp = head, *prev = NULL;
     int reg;
 
     printf("Enter Registration Number to remove: ");
     scanf("%d", &reg);
 
-    while (temp != NULL && temp->regNo != reg)
+    Student *cur = head, *prev = NULL;
+
+    while (cur != NULL && cur->regNo != reg)
     {
-        prev = temp;
-        temp = temp->next;
+        prev = cur;
+        cur = cur->next;
     }
 
-    if (temp == NULL)
+    if (cur == NULL)
     {
         printf("Student not found.\n");
         return;
     }
 
     if (prev == NULL)
-        head = temp->next;
+        head = cur->next;
     else
-        prev->next = temp->next;
+        prev->next = cur->next;
 
-    free(temp);
+    free(cur);
     printf("Student removed successfully.\n");
 }
 
-void display()
+void display(void)
 {
-    struct Student *temp = head;
-
     if (head == NULL)
     {
         printf("No students registered.\n");
@@ -82,70 +81,65 @@ void display()
     }
 
     printf("\nRegistration No.\tName\n");
-    while (temp != NULL)
-    {
-        printf("%d\t\t\t%s\n", temp->regNo, temp->name);
-        temp = temp->next;
-    }
+
+    for (Student *p = head; p != NULL; p = p->next)
+        printf("%d\t\t\t%s\n", p->regNo, p->name);
 }
 
-void countStudents()
+void countStudents(void)
 {
-    struct Student *temp = head;
     int count = 0;
 
-    while (temp != NULL)
-    {
+    for (Student *p = head; p != NULL; p = p->next)
         count++;
-        temp = temp->next;
-    }
 
     printf("Total participants: %d\n", count);
 }
 
-void sortStudents()
+/* Swaps only the data, not the next pointers. */
+void swapData(Student *a, Student *b)
 {
-    struct Student *i, *j;
-    int reg;
-    char name[50];
+    int reg = a->regNo;
+    a->regNo = b->regNo;
+    b->regNo = reg;
 
-    for (i = head; i != NULL; i = i->next)
+    char name[50];
+    strcpy(name, a->name);
+    strcpy(a->name, b->name);
+    strcpy(b->name, name);
+}
+
+void sortStudents(void)
+{
+    for (Student *i = head; i != NULL; i = i->next)
     {
-        for (j = i->next; j != NULL; j = j->next)
+        for (Student *j = i->next; j != NULL; j = j->next)
         {
             if (i->regNo > j->regNo)
-            {
-                reg = i->regNo;
-                i->regNo = j->regNo;
-                j->regNo = reg;
-
-                strcpy(name, i->name);
-                strcpy(i->name, j->name);
-                strcpy(j->name, name);
-            }
+                swapData(i, j);
         }
     }
 
     printf("List sorted by Registration Number.\n");
 }
 
-void reverseList()
+void reverseList(void)
 {
-    struct Student *prev = NULL, *current = head, *next;
+    Student *prev = NULL, *cur = head, *next;
 
-    while (current != NULL)
+    while (cur != NULL)
     {
-        next = current->next;
-        current->next = prev;
-        prev = current;
-        current = next;
+        next = cur->next;
+        cur->next = prev;
+        prev = cur;
+        cur = next;
     }
 
     head = prev;
     printf("List reversed successfully.\n");
 }
 
-int main()
+int main(void)
 {
     int choice;
 
@@ -192,7 +186,7 @@ int main()
 
     while (head != NULL)
     {
-        struct Student *temp = head;
+        Student *temp = head;
         head = head->next;
         free(temp);
     }

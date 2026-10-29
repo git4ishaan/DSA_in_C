@@ -2,13 +2,13 @@
 
 Every C program in this folder, in one place.
 
-- 14 programs covering 9 topics
+- 12 programs covering 9 topics
 - Code is copied exactly from the `.c` files, so every listing compiles as shown
 - Each entry has a one-line purpose, a compile command, and the full code
 
-> **Note:** `GUIDE/` also discusses a few earlier single-purpose programs
-> (saddle point, separate search/sort files, `sll_workshop.c`) that are now only in the
-> git history. Only the files actually present are included here.
+> **Note:** `GUIDE/` also refers to programs that are no longer in the folder
+> (saddle point, separate search/sort files, separate sparse files, `sll_workshop.c`).
+> Only the files actually present are included here.
 
 ## Contents
 
@@ -19,8 +19,8 @@ Every C program in this folder, in one place.
 | Sorting | `bubble_sort.c` | `GUIDE/04_SORTING.md` |
 | Sparse matrix | `combi_sparse.c` | `GUIDE/05_SPARSE.md` |
 | Stack | `stack.c`, `stack2.c` | `GUIDE/06_STACK.md` |
-| Linear queue | `linear_queue.c`, `linear_queue_simple.c` | `GUIDE/07_QUEUE.md` |
-| Circular queue | `circular_queue.c`, `circular_queue_simple.c` | `GUIDE/07_QUEUE.md` |
+| Linear queue | `linear_queue.c` | `GUIDE/07_QUEUE.md` |
+| Circular queue | `circular_queue.c` | `GUIDE/07_QUEUE.md` |
 | Singly linked list | `singlyll.c` | `GUIDE/08_SLL.md` |
 | Circular list and polynomials | `circlell.c`, `poly_add.c`, `poly_add_menu.c` | `GUIDE/09_CLL_POLY.md` |
 
@@ -32,8 +32,9 @@ gcc <file>.c -o <file>.exe -Wall
 ```
 
 `poly_add.c` and `poly_add_menu.c` read their input without prompts unless
-`poly_add_menu.c` is built with `-DINTERACTIVE`. The exact input format is described
-in the comment at the top of `poly_add.c`; `circlell.c` is fully interactive.
+`poly_add_menu.c` is built with `-DINTERACTIVE`. The exact input format is
+described in the comment at the top of `poly_add.c`; `circlell.c` is fully
+interactive.
 
 ---
 
@@ -852,8 +853,8 @@ int evaluatePostfix(char expression[])
 
     for (i = 0; expression[i] != '\0'; i++)
     {
-        /* Ignore spaces */
-        if (expression[i] == ' ')
+        /* Ignore whitespace, including the newline left by fgets */
+        if (isspace((unsigned char)expression[i]))
             continue;
 
         /* If operand, push it */
@@ -918,7 +919,7 @@ int main()
 
 ## Linear queue
 
-Two array-based queues, both with MAX = 5. `linear_queue.c` stores print-job records; `linear_queue_simple.c` is the minimal integer version. Once `rear` reaches the end of the array the queue reports overflow, even if slots at the front were freed. That limitation is what the circular queue fixes.
+Array-based queue for print jobs, with MAX = 5. Once rear reaches the end of the array the queue reports overflow, even if slots at the front were freed. That limitation is what the circular queue fixes.
 
 ### `linear_queue.c`
 
@@ -1056,110 +1057,11 @@ int main()
 }
 ```
 
-### `linear_queue_simple.c`
-
-**What it does:** Minimal integer linear queue: insert, delete and display.
-
-```powershell
-gcc linear_queue_simple.c -o linear_queue_simple -Wall
-.\linear_queue_simple.exe
-```
-
-```c
-#include <stdio.h>
-
-#define MAX 5
-
-int queue[MAX];
-int front = -1, rear = -1;
-
-/* Add an item at the rear */
-void enqueue()
-{
-    int value;
-
-    if (rear == MAX - 1)
-    {
-        printf("Queue Overflow!\n");
-        return;
-    }
-
-    printf("Enter value: ");
-    scanf("%d", &value);
-
-    if (front == -1)          /* first item */
-        front = 0;
-
-    rear++;
-    queue[rear] = value;
-    printf("%d inserted.\n", value);
-}
-
-/* Remove the item at the front */
-void dequeue()
-{
-    if (front == -1)
-    {
-        printf("Queue Underflow!\n");
-        return;
-    }
-
-    printf("Deleted: %d\n", queue[front]);
-    front++;
-
-    if (front > rear)         /* last item removed */
-    {
-        front = -1;
-        rear = -1;
-    }
-}
-
-/* Print items from front to rear */
-void display()
-{
-    int i;
-
-    if (front == -1)
-    {
-        printf("Queue is empty.\n");
-        return;
-    }
-
-    printf("Queue: ");
-    for (i = front; i <= rear; i++)
-        printf("%d ", queue[i]);
-    printf("\n");
-}
-
-int main()
-{
-    int choice;
-
-    do
-    {
-        printf("\n1.Insert  2.Delete  3.Display  4.Exit\n");
-        printf("Choice: ");
-        scanf("%d", &choice);
-
-        switch (choice)
-        {
-        case 1: enqueue(); break;
-        case 2: dequeue(); break;
-        case 3: display(); break;
-        case 4: printf("Bye.\n"); break;
-        default: printf("Invalid choice.\n");
-        }
-    } while (choice != 4);
-
-    return 0;
-}
-```
-
 ---
 
 ## Circular queue
 
-Two array-based circular queues, both MAX = 5. `circular_queue.c` stores print-job records; `circular_queue_simple.c` is the minimal integer version. Modulo arithmetic reuses freed slots, and the queue counts as full when `(rear + 1) % MAX == front`. Because empty is tracked with `front = -1`, all 5 slots are usable.
+Array-based circular queue for print jobs, also MAX = 5. Modulo arithmetic reuses freed slots, and the queue counts as full when (rear + 1) % MAX == front. Because empty is tracked with front = -1, all 5 slots are usable.
 
 ### `circular_queue.c`
 
@@ -1295,124 +1197,6 @@ int main() {
 }
 ```
 
-### `circular_queue_simple.c`
-
-**What it does:** Minimal integer circular queue with wrap-around insert, delete and display.
-
-```powershell
-gcc circular_queue_simple.c -o circular_queue_simple -Wall
-.\circular_queue_simple.exe
-```
-
-```c
-#include <stdio.h>
-
-#define MAX 5
-
-int queue[MAX];
-int front = -1, rear = -1;
-
-/* Add an item at the rear (wraps around) */
-void enqueue()
-{
-    int value;
-
-    if ((rear + 1) % MAX == front)
-    {
-        printf("Queue Overflow!\n");
-        return;
-    }
-
-    printf("Enter value: ");
-    scanf("%d", &value);
-
-    if (front == -1)          /* first item */
-    {
-        front = 0;
-        rear = 0;
-    }
-    else
-    {
-        rear = (rear + 1) % MAX;
-    }
-
-    queue[rear] = value;
-    printf("%d inserted.\n", value);
-}
-
-/* Remove the item at the front */
-void dequeue()
-{
-    if (front == -1)
-    {
-        printf("Queue Underflow!\n");
-        return;
-    }
-
-    printf("Deleted: %d\n", queue[front]);
-
-    if (front == rear)        /* last item removed */
-    {
-        front = -1;
-        rear = -1;
-    }
-    else
-    {
-        front = (front + 1) % MAX;
-    }
-}
-
-/* Print items from front to rear, wrapping around */
-void display()
-{
-    int i;
-
-    if (front == -1)
-    {
-        printf("Queue is empty.\n");
-        return;
-    }
-
-    printf("Queue: ");
-    i = front;
-
-    while (1)
-    {
-        printf("%d ", queue[i]);
-
-        if (i == rear)
-            break;
-
-        i = (i + 1) % MAX;
-    }
-
-    printf("\n");
-}
-
-int main()
-{
-    int choice;
-
-    do
-    {
-        printf("\n1.Insert  2.Delete  3.Display  4.Exit\n");
-        printf("Choice: ");
-        scanf("%d", &choice);
-
-        switch (choice)
-        {
-        case 1: enqueue(); break;
-        case 2: dequeue(); break;
-        case 3: display(); break;
-        case 4: printf("Bye.\n"); break;
-        default: printf("Invalid choice.\n");
-        }
-    } while (choice != 4);
-
-    return 0;
-}
-```
-
 ---
 
 ## Singly linked list
@@ -1433,78 +1217,78 @@ gcc singlyll.c -o singlyll -Wall
 #include <stdlib.h>
 #include <string.h>
 
-struct Student
+typedef struct Student
 {
     int regNo;
     char name[50];
     struct Student *next;
-};
+} Student;
 
-struct Student *head = NULL;
+Student *head = NULL;
 
-void addStudent()
+void addStudent(void)
 {
-    struct Student *newNode, *temp;
-    newNode = (struct Student *)malloc(sizeof(struct Student));
+    Student *s = malloc(sizeof(Student));
 
-    if (newNode == NULL)
+    if (s == NULL)
     {
         printf("Memory allocation failed.\n");
         return;
     }
 
     printf("Enter Registration Number: ");
-    scanf("%d", &newNode->regNo);
+    scanf("%d", &s->regNo);
     printf("Enter Name: ");
-    scanf(" %49[^\n]", newNode->name);
-    newNode->next = NULL;
+    scanf(" %49[^\n]", s->name);
+    s->next = NULL;
 
     if (head == NULL)
-        head = newNode;
+    {
+        head = s;
+    }
     else
     {
-        temp = head;
-        while (temp->next != NULL)
-            temp = temp->next;
-        temp->next = newNode;
+        Student *p = head;
+        while (p->next != NULL)
+            p = p->next;
+        p->next = s;
     }
 
     printf("Student added successfully.\n");
 }
 
-void removeStudent()
+void removeStudent(void)
 {
-    struct Student *temp = head, *prev = NULL;
     int reg;
 
     printf("Enter Registration Number to remove: ");
     scanf("%d", &reg);
 
-    while (temp != NULL && temp->regNo != reg)
+    Student *cur = head, *prev = NULL;
+
+    while (cur != NULL && cur->regNo != reg)
     {
-        prev = temp;
-        temp = temp->next;
+        prev = cur;
+        cur = cur->next;
     }
 
-    if (temp == NULL)
+    if (cur == NULL)
     {
         printf("Student not found.\n");
         return;
     }
 
     if (prev == NULL)
-        head = temp->next;
+        head = cur->next;
     else
-        prev->next = temp->next;
+        prev->next = cur->next;
 
-    free(temp);
+    free(cur);
     printf("Student removed successfully.\n");
 }
 
-void display()
+void display(void)
 {
-    struct Student *temp = head;
-
     if (head == NULL)
     {
         printf("No students registered.\n");
@@ -1512,70 +1296,65 @@ void display()
     }
 
     printf("\nRegistration No.\tName\n");
-    while (temp != NULL)
-    {
-        printf("%d\t\t\t%s\n", temp->regNo, temp->name);
-        temp = temp->next;
-    }
+
+    for (Student *p = head; p != NULL; p = p->next)
+        printf("%d\t\t\t%s\n", p->regNo, p->name);
 }
 
-void countStudents()
+void countStudents(void)
 {
-    struct Student *temp = head;
     int count = 0;
 
-    while (temp != NULL)
-    {
+    for (Student *p = head; p != NULL; p = p->next)
         count++;
-        temp = temp->next;
-    }
 
     printf("Total participants: %d\n", count);
 }
 
-void sortStudents()
+/* Swaps only the data, not the next pointers. */
+void swapData(Student *a, Student *b)
 {
-    struct Student *i, *j;
-    int reg;
-    char name[50];
+    int reg = a->regNo;
+    a->regNo = b->regNo;
+    b->regNo = reg;
 
-    for (i = head; i != NULL; i = i->next)
+    char name[50];
+    strcpy(name, a->name);
+    strcpy(a->name, b->name);
+    strcpy(b->name, name);
+}
+
+void sortStudents(void)
+{
+    for (Student *i = head; i != NULL; i = i->next)
     {
-        for (j = i->next; j != NULL; j = j->next)
+        for (Student *j = i->next; j != NULL; j = j->next)
         {
             if (i->regNo > j->regNo)
-            {
-                reg = i->regNo;
-                i->regNo = j->regNo;
-                j->regNo = reg;
-
-                strcpy(name, i->name);
-                strcpy(i->name, j->name);
-                strcpy(j->name, name);
-            }
+                swapData(i, j);
         }
     }
 
     printf("List sorted by Registration Number.\n");
 }
 
-void reverseList()
+void reverseList(void)
 {
-    struct Student *prev = NULL, *current = head, *next;
+    Student *prev = NULL, *cur = head, *next;
 
-    while (current != NULL)
+    while (cur != NULL)
     {
-        next = current->next;
-        current->next = prev;
-        prev = current;
-        current = next;
+        next = cur->next;
+        cur->next = prev;
+        prev = cur;
+        cur = next;
     }
 
     head = prev;
     printf("List reversed successfully.\n");
 }
 
-int main()
+int main(void)
 {
     int choice;
 
@@ -1622,7 +1401,7 @@ int main()
 
     while (head != NULL)
     {
-        struct Student *temp = head;
+        Student *temp = head;
         head = head->next;
         free(temp);
     }
@@ -1650,101 +1429,73 @@ gcc circlell.c -o circlell -Wall
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Node
+typedef struct Node
 {
     int coeff, exp;
     struct Node *next;
-};
+} Node;
 
-struct Node *createNode(int c, int e)
+/* An empty list is just a header node pointing to itself. */
+Node *newList(void)
 {
-    struct Node *n = malloc(sizeof(struct Node));
-    if (n == NULL)
+    Node *head = malloc(sizeof(Node));
+
+    if (head == NULL)
     {
         printf("Memory allocation failed.\n");
         exit(1);
     }
-    n->coeff = c;
-    n->exp = e;
-    n->next = n;
-    return n;
+
+    head->coeff = 0;
+    head->exp = 0;
+    head->next = head;
+    return head;
 }
 
-void insert(struct Node **head, int c, int e)
+/* Insert in descending exponent order, combining equal exponents. */
+void insert(Node *head, int c, int e)
 {
     if (c == 0)
         return;
 
-    struct Node *p = *head, *prev = NULL;
+    Node *prev = head, *cur = head->next;
 
-    if (p != NULL)
+    while (cur != head && cur->exp > e)
     {
-        do
+        prev = cur;
+        cur = cur->next;
+    }
+
+    if (cur != head && cur->exp == e)
+    {
+        cur->coeff += c;
+
+        if (cur->coeff == 0)
         {
-            if (p->exp == e)
-            {
-                p->coeff += c;
-                if (p->coeff == 0)
-                {
-                    if (p->next == p)
-                    {
-                        *head = NULL;
-                    }
-                    else
-                    {
-                        if (prev == NULL)
-                        {
-                            struct Node *last = p;
-                            while (last->next != p)
-                                last = last->next;
-                            *head = p->next;
-                            last->next = *head;
-                        }
-                        else
-                        {
-                            prev->next = p->next;
-                        }
-                    }
-                    free(p);
-                }
-                return;
-            }
-            if (p->exp < e)
-                break;
-            prev = p;
-            p = p->next;
-        } while (p != *head);
+            prev->next = cur->next;
+            free(cur);
+        }
+        return;
     }
 
-    struct Node *n = createNode(c, e);
+    Node *n = malloc(sizeof(Node));
 
-    if (*head == NULL)
+    if (n == NULL)
     {
-        *head = n;
+        printf("Memory allocation failed.\n");
+        return;
     }
-    else if (p == *head && prev == NULL)
-    {
-        struct Node *last = *head;
-        while (last->next != *head)
-            last = last->next;
-        n->next = *head;
-        last->next = n;
-        *head = n;
-    }
-    else
-    {
-        n->next = p;
-        prev->next = n;
-        /* NOTE: do NOT move *head here. This branch is also reached when the
-         * loop wrapped around (new exponent is the smallest), and in that case
-         * the node must simply be appended after `prev` (the last node).
-         * Moving head would break the descending order. */
-    }
+
+    n->coeff = c;
+    n->exp = e;
+    n->next = cur;
+    prev->next = n;
 }
 
-void create(struct Node **head)
+void create(Node *head)
 {
     int n, c, e;
+
     printf("Enter number of terms: ");
     scanf("%d", &n);
 
@@ -1756,129 +1507,105 @@ void create(struct Node **head)
     }
 }
 
-void display(struct Node *head)
+void display(Node *head)
 {
-    if (head == NULL)
+    Node *p = head->next;
+
+    if (p == head)
     {
         printf("0\n");
         return;
     }
 
-    struct Node *p = head;
     int first = 1;
 
-    do
+    while (p != head)
     {
-        if (p->coeff != 0)
+        if (!first)
         {
-            if (!first && p->coeff > 0)
+            if (p->coeff > 0)
                 printf(" + ");
-            if (p->coeff < 0)
-                printf(first ? "-" : " - ");
-
-            int c = abs(p->coeff);
-            if (p->exp == 0 || c != 1)
-                printf("%d", c);
-            if (p->exp > 0)
-            {
-                printf("x");
-                if (p->exp > 1)
-                    printf("^%d", p->exp);
-            }
-            first = 0;
+            else
+                printf(" - ");
         }
-        p = p->next;
-    } while (p != head);
+        else if (p->coeff < 0)
+        {
+            printf("-");
+        }
 
-    if (first)
-        printf("0");
+        int c = abs(p->coeff);
+
+        if (p->exp == 0 || c != 1)
+            printf("%d", c);
+
+        if (p->exp > 0)
+        {
+            printf("x");
+
+            if (p->exp > 1)
+                printf("^%d", p->exp);
+        }
+
+        first = 0;
+        p = p->next;
+    }
+
     printf("\n");
 }
 
-struct Node *add(struct Node *a, struct Node *b)
+Node *add(Node *a, Node *b)
 {
-    struct Node *result = NULL, *p = a, *q = b;
-    int da = (a == NULL), db = (b == NULL);
+    Node *sum = newList();
+    Node *p;
 
-    while (!da || !db)
-    {
-        if (da)
-        {
-            insert(&result, q->coeff, q->exp);
-            q = q->next;
-            if (q == b)
-                db = 1;
-        }
-        else if (db)
-        {
-            insert(&result, p->coeff, p->exp);
-            p = p->next;
-            if (p == a)
-                da = 1;
-        }
-        else if (p->exp == q->exp)
-        {
-            insert(&result, p->coeff + q->coeff, p->exp);
-            p = p->next;
-            q = q->next;
-            if (p == a)
-                da = 1;
-            if (q == b)
-                db = 1;
-        }
-        else if (p->exp > q->exp)
-        {
-            insert(&result, p->coeff, p->exp);
-            p = p->next;
-            if (p == a)
-                da = 1;
-        }
-        else
-        {
-            insert(&result, q->coeff, q->exp);
-            q = q->next;
-            if (q == b)
-                db = 1;
-        }
-    }
-    return result;
+    for (p = a->next; p != a; p = p->next)
+        insert(sum, p->coeff, p->exp);
+
+    for (p = b->next; p != b; p = p->next)
+        insert(sum, p->coeff, p->exp);
+
+    return sum;
 }
 
-void freeList(struct Node *head)
+void freeList(Node *head)
 {
-    if (head == NULL)
-        return;
-    struct Node *p = head->next;
+    Node *p = head->next;
+
     while (p != head)
     {
-        struct Node *temp = p;
+        Node *temp = p;
         p = p->next;
         free(temp);
     }
+
     free(head);
 }
 
 int main(void)
 {
-    struct Node *p1 = NULL, *p2 = NULL, *sum;
+    Node *p1 = newList();
+    Node *p2 = newList();
 
     printf("Polynomial 1\n");
-    create(&p1);
+    create(p1);
+
     printf("Polynomial 2\n");
-    create(&p2);
+    create(p2);
 
     printf("P1 = ");
     display(p1);
     printf("P2 = ");
     display(p2);
 
-    sum = add(p1, p2);
+    Node *sum = add(p1, p2);
+
     printf("Sum = ");
     display(sum);
 
     freeList(p1);
     freeList(p2);
     freeList(sum);
+
     return 0;
 }
 ```

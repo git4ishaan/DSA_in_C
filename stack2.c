@@ -35,8 +35,8 @@ int evaluatePostfix(char expression[])
 
     for (i = 0; expression[i] != '\0'; i++)
     {
-        /* Ignore spaces */
-        if (expression[i] == ' ')
+        /* Ignore whitespace, including the newline left by fgets */
+        if (isspace((unsigned char)expression[i]))
             continue;
 
         /* If operand, push it */

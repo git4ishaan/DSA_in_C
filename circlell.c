@@ -1,102 +1,73 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Node
+typedef struct Node
 {
     int coeff, exp;
     struct Node *next;
-};
+} Node;
 
-struct Node *createNode(int c, int e)
+/* An empty list is just a header node pointing to itself. */
+Node *newList(void)
 {
-    struct Node *n = malloc(sizeof(struct Node));
-    if (n == NULL)
+    Node *head = malloc(sizeof(Node));
+
+    if (head == NULL)
     {
         printf("Memory allocation failed.\n");
         exit(1);
     }
-    n->coeff = c;
-    n->exp = e;
-    n->next = n;
-    return n;
+
+    head->coeff = 0;
+    head->exp = 0;
+    head->next = head;
+    return head;
 }
 
-void insert(struct Node **head, int c, int e)
+/* Insert in descending exponent order, combining equal exponents. */
+void insert(Node *head, int c, int e)
 {
     if (c == 0)
         return;
 
-    struct Node *p = *head, *prev = NULL;
+    Node *prev = head, *cur = head->next;
 
-    if (p != NULL)
+    while (cur != head && cur->exp > e)
     {
-        do
+        prev = cur;
+        cur = cur->next;
+    }
+
+    if (cur != head && cur->exp == e)
+    {
+        cur->coeff += c;
+
+        if (cur->coeff == 0)
         {
-            if (p->exp == e)
-            {
-                p->coeff += c;
-                if (p->coeff == 0)
-                {
-                    if (p->next == p)
-                    {
-                        *head = NULL;
-                    }
-                    else
-                    {
-                        if (prev == NULL)
-                        {
-                            struct Node *last = p;
-                            while (last->next != p)
-                                last = last->next;
-                            *head = p->next;
-                            last->next = *head;
-                        }
-                        else
-                        {
-                            prev->next = p->next;
-                        }
-                    }
-                    free(p);
-                }
-                return;
-            }
-            if (p->exp < e)
-                break;
-            prev = p;
-            p = p->next;
-        } while (p != *head);
+            prev->next = cur->next;
+            free(cur);
+        }
+        return;
     }
 
-    struct Node *n = createNode(c, e);
+    Node *n = malloc(sizeof(Node));
 
-    if (*head == NULL)
+    if (n == NULL)
     {
-        *head = n;
+        printf("Memory allocation failed.\n");
+        return;
     }
-    else if (p == *head && prev == NULL)
-    {
-        struct Node *last = *head;
-        while (last->next != *head)
-            last = last->next;
-        n->next = *head;
-        last->next = n;
-        *head = n;
-    }
-    else
-    {
-        n->next = p;
-        prev->next = n;
-        /* NOTE: do NOT move *head here. This branch is also reached when the
-         * loop wrapped around (new exponent is the smallest), and in that case
-         * the node must simply be appended after `prev` (the last node).
-         * Moving head would break the descending order. */
-    }
+
+    n->coeff = c;
+    n->exp = e;
+    n->next = cur;
+    prev->next = n;
 }
 
-void create(struct Node **head)
+void create(Node *head)
 {
     int n, c, e;
+
     printf("Enter number of terms: ");
     scanf("%d", &n);
 
@@ -108,128 +79,104 @@ void create(struct Node **head)
     }
 }
 
-void display(struct Node *head)
+void display(Node *head)
 {
-    if (head == NULL)
+    Node *p = head->next;
+
+    if (p == head)
     {
         printf("0\n");
         return;
     }
 
-    struct Node *p = head;
     int first = 1;
 
-    do
+    while (p != head)
     {
-        if (p->coeff != 0)
+        if (!first)
         {
-            if (!first && p->coeff > 0)
+            if (p->coeff > 0)
                 printf(" + ");
-            if (p->coeff < 0)
-                printf(first ? "-" : " - ");
-
-            int c = abs(p->coeff);
-            if (p->exp == 0 || c != 1)
-                printf("%d", c);
-            if (p->exp > 0)
-            {
-                printf("x");
-                if (p->exp > 1)
-                    printf("^%d", p->exp);
-            }
-            first = 0;
+            else
+                printf(" - ");
         }
-        p = p->next;
-    } while (p != head);
+        else if (p->coeff < 0)
+        {
+            printf("-");
+        }
 
-    if (first)
-        printf("0");
+        int c = abs(p->coeff);
+
+        if (p->exp == 0 || c != 1)
+            printf("%d", c);
+
+        if (p->exp > 0)
+        {
+            printf("x");
+
+            if (p->exp > 1)
+                printf("^%d", p->exp);
+        }
+
+        first = 0;
+        p = p->next;
+    }
+
     printf("\n");
 }
 
-struct Node *add(struct Node *a, struct Node *b)
+Node *add(Node *a, Node *b)
 {
-    struct Node *result = NULL, *p = a, *q = b;
-    int da = (a == NULL), db = (b == NULL);
+    Node *sum = newList();
+    Node *p;
 
-    while (!da || !db)
-    {
-        if (da)
-        {
-            insert(&result, q->coeff, q->exp);
-            q = q->next;
-            if (q == b)
-                db = 1;
-        }
-        else if (db)
-        {
-            insert(&result, p->coeff, p->exp);
-            p = p->next;
-            if (p == a)
-                da = 1;
-        }
-        else if (p->exp == q->exp)
-        {
-            insert(&result, p->coeff + q->coeff, p->exp);
-            p = p->next;
-            q = q->next;
-            if (p == a)
-                da = 1;
-            if (q == b)
-                db = 1;
-        }
-        else if (p->exp > q->exp)
-        {
-            insert(&result, p->coeff, p->exp);
-            p = p->next;
-            if (p == a)
-                da = 1;
-        }
-        else
-        {
-            insert(&result, q->coeff, q->exp);
-            q = q->next;
-            if (q == b)
-                db = 1;
-        }
-    }
-    return result;
+    for (p = a->next; p != a; p = p->next)
+        insert(sum, p->coeff, p->exp);
+
+    for (p = b->next; p != b; p = p->next)
+        insert(sum, p->coeff, p->exp);
+
+    return sum;
 }
 
-void freeList(struct Node *head)
+void freeList(Node *head)
 {
-    if (head == NULL)
-        return;
-    struct Node *p = head->next;
+    Node *p = head->next;
+
     while (p != head)
     {
-        struct Node *temp = p;
+        Node *temp = p;
         p = p->next;
         free(temp);
     }
+
     free(head);
 }
 
 int main(void)
 {
-    struct Node *p1 = NULL, *p2 = NULL, *sum;
+    Node *p1 = newList();
+    Node *p2 = newList();
 
     printf("Polynomial 1\n");
-    create(&p1);
+    create(p1);
+
     printf("Polynomial 2\n");
-    create(&p2);
+    create(p2);
 
     printf("P1 = ");
     display(p1);
     printf("P2 = ");
     display(p2);
 
-    sum = add(p1, p2);
+    Node *sum = add(p1, p2);
+
     printf("Sum = ");
     display(sum);
 
     freeList(p1);
     freeList(p2);
     freeList(sum);
+
     return 0;
 }

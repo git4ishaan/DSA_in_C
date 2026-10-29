@@ -23,6 +23,10 @@ minimal integer versions; the other two show the same operations on a queue of s
 
 - [`ALL_CODE.md`](ALL_CODE.md) — every program in one place, copied exactly from the
   `.c` files.
+- [`ASSIGNMENT_CODE_1_2_3_8_9.md`](ASSIGNMENT_CODE_1_2_3_8_9.md) — code for assignments
+  1, 2, 3, 8 and 9 with problem statements and compile commands.
+- [`ASSIGNMENT_CODE_4_5_6_7.md`](ASSIGNMENT_CODE_4_5_6_7.md) — code for assignments
+  4, 5, 6 and 7 with problem statements and compile commands.
 - [`GUIDE/`](GUIDE/) — exam-oriented notes for every assignment: concept, exam-ready
   algorithm, annotated code, dry run, viva questions and common mistakes.
 

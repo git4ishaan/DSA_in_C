@@ -195,7 +195,9 @@ pop+output everything remaining
 ```
 
 ### Evaluate postfix
-```
+```go through the files and 
+
+Update the content as i have implemented many changes
 for each ch
   digit    -> push value
   operator -> b = pop, a = pop, push (a op b)

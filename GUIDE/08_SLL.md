@@ -72,7 +72,7 @@ This is a **self-referential structure**: a struct containing a pointer to its o
 struct Student *head = NULL;    /* NULL = empty list */
 ```
 
-In your file `head` is a **global** variable (line 13), which is why the functions do not
+In your file `head` is a **global** variable (line 12), which is why the functions do not
 need to return it. If it were local to `main`, every insert/delete would need
 `struct Student **head` or a return value.
 
@@ -133,7 +133,7 @@ else
 **last** node so we can modify its `next`. If the loop were `temp != NULL`, `temp` would
 become `NULL` and we would have nothing to attach to.
 
-This is exactly what `addStudent()` in your file does (lines 32–40).
+This is exactly what `addStudent()` in your file does (lines 30–40).
 
 ### D. Delete a node — three cases
 
@@ -171,8 +171,8 @@ else
 **Three cases to always mention:** empty/not found, first node (must move `head`),
 middle or last node (must change `prev->next`).
 
-This is `removeStudent()` in your file, lines 45–72 — including the `prev == NULL`
-special case on line 65.
+This is `removeStudent()` in your file, lines 45–73 — including the `prev == NULL`
+special case on line 66.
 
 ### E. Reverse — the classic interview/exam question
 
@@ -211,7 +211,7 @@ head = prev;
 **The order is everything.** `next = current->next` must happen first; after
 `current->next = prev`, the original next node is unreachable unless you saved it.
 
-This is `reverseList()` in your file, lines 132–146. Memorise those five lines.
+This is `reverseList()` in your file, lines 126–140. Memorise those five lines.
 
 ### F. Traverse / display
 
@@ -337,15 +337,16 @@ sorted, because there is no random access to the middle.
 
 | Lines | Function | Logic |
 |-------|----------|-------|
-| 6–11 | `struct Student` | node: regNo, name, next |
-| 13 | `head = NULL` | global head, empty list |
-| 15–43 | `addStudent()` | malloc → check → read → append at end |
-| 45–72 | `removeStudent()` | search by regNo → unlink → free |
-| 74–90 | `display()` | traverse with `temp != NULL` |
-| 92–104 | `countStudents()` | traverse, count |
-| 106–130 | `sortStudents()` | bubble sort **swapping data**, not nodes |
-| 132–146 | `reverseList()` | three-pointer reversal |
-| 148–201 | `main()` | menu, then free all nodes before exit |
+| 5–10 | `struct Student` | node: regNo, name, next (`typedef`ed as `Student`) |
+| 12 | `head = NULL` | global head, empty list |
+| 14–43 | `addStudent()` | malloc → check → read → append at end |
+| 45–73 | `removeStudent()` | search by regNo → unlink → free |
+| 75–87 | `display()` | `for` loop from head to NULL |
+| 89–98 | `countStudents()` | traverse, count |
+| 100–110 | `swapData()` | swaps `regNo` and `name` only |
+| 112–124 | `sortStudents()` | bubble sort calling `swapData()` |
+| 126–140 | `reverseList()` | three-pointer reversal |
+| 142–195 | `main()` | menu, then free all nodes before exit |
 
 ### Two design choices worth defending in viva
 
@@ -353,8 +354,9 @@ sorted, because there is no random access to the middle.
    Simpler and safe (no pointer juggling). It is O(n²) data copies but O(1) extra
    memory. Relinking would be faster for large records but much easier to get wrong.
    Say: *"I swap the data fields, which keeps the list structure untouched."*
+   The swap itself is in `swapData()` (lines 100–110).
 
-2. **Freeing the whole list at exit** (lines 193–198). Good practice; mention it as
+2. **Freeing the whole list at exit** (lines 187–192). Good practice; mention it as
    avoiding a memory leak.
 
 ### Dry run: reverse `10 → 20 → 30`
